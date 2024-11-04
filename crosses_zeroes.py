@@ -1,3 +1,6 @@
+import random
+
+
 #Создаем игровое поле
 playinig_field = {(0, 0): "-", (0, 1): "-", (0, 2): "-",
                   (1, 0): "-", (1, 1): "-", (1, 2): "-",
@@ -6,7 +9,9 @@ playinig_field = {(0, 0): "-", (0, 1): "-", (0, 2): "-",
 
 def dislayning_the_playinig_field(a: dict) -> str:
 
-    """Функция отображения текущего состояния игрового поля
+    """Отображение текущего состояния игрового поля
+
+
         функция формирует и возвращает игровое проле в виде строки
     """
 
@@ -16,17 +21,17 @@ def dislayning_the_playinig_field(a: dict) -> str:
     for i in range(3):
         new_string = f" Y  {i}" if i == 1 else f"    {i}" # Создаем новую строку с подписью значений координат по оси Y
         for j in range(3):
-            new_string += f"  |  {playinig_field[(i, j)]  }"        #Добавляем в новую строку значения столбцов
+            new_string += f"  |  {a[(i, j)]  }"        #Добавляем в новую строку значения столбцов
         new_string += (f"  |\n"
                        f"{" " * 7}{"-" * 19}\n")        #Делаем переход на новую строку с оформлением горизонтальной линии
         field += new_string         #Добавляем новую строку к игровому полю
     return field        #Возвращаем значение текущего игрового поля
 
-print(dislayning_the_playinig_field(playinig_field))
+
 
 def check_win(a: dict, symbol) -> bool:
 
-    """Функция проверки выигрышных комбинаций
+    """Проверка выигрышных комбинаций
 
     в функции создается контрольный список "control_list" с проверяемыми символами
     и 4 списка:
@@ -34,7 +39,7 @@ def check_win(a: dict, symbol) -> bool:
      - line - список, для проверки выигрышных комбинаций по строке
      - column - список, для проверки выигрышных комбинаций по столбцу
 
-    если хотябы один из 4-х списков совпадет с контрольным, фунция вернет: "True",
+    если хотя-бы один из 4-х списков совпадет с контрольным, фунция вернет: "True",
     иначе:  False"""
 
 
@@ -45,12 +50,12 @@ def check_win(a: dict, symbol) -> bool:
         line = []           #список для проверки комбинации по строке
         column = []         #список для проверки комбинации по столбцу
         for j in range(3):
-            line.append(playinig_field[(i, j)])             #заполняем список строк
-            column.append(playinig_field[(j, i)])           #заполняем список столбцов
+            line.append(a[(i, j)])             #заполняем список строк
+            column.append(a[(j, i)])           #заполняем список столбцов
             if i == j:
-                diagonal_1.append(playinig_field[(j, i)])   #заполняем списки диагоналей
+                diagonal_1.append(a[(j, i)])   #заполняем списки диагоналей
             if i + j == 2:
-                diagonal_2.append(playinig_field[(j, i)])
+                diagonal_2.append(a[(j, i)])
 
         if (line == control_list or column == control_list or
                 diagonal_1 == control_list or diagonal_2 == control_list):      #сравниваем списоки с тестовым
@@ -61,7 +66,7 @@ def check_win(a: dict, symbol) -> bool:
 
 def coordinate_check(x:str, y:str) -> bool:
 
-    """ Функция проверки введенных кординат
+    """ Проверка введенных кординат
 
     Функция принимает на вход значения координат и проверяет:
     - количество введенных символов;
@@ -79,17 +84,28 @@ def coordinate_check(x:str, y:str) -> bool:
     return False
 
 
-def check_add_symbol(symbol:str) -> any:
+def check_add_symbol(a: dict, symbol:str) -> any:
+
+    """Добавление символа на игровое поле
+
+    Функция запрашивает у пользователя координаты, проверяет,
+    что указанные координаты свободны, и записывает символ на игровое поле
+    если пользователь ввел неверные координаты или позиция уже занята, выводид
+    соответствующее сообщение.
+
+    """
+
+
     while True:
         print(f"Ход '{symbol}'")
         x = input("Введите x (от 0 до 2): ")
-        y = input("Введите y (от 0 до 2): ")
-        if coordinate_check(x, y):
-            if playinig_field[(int(y), int(x))] == "-":
-                playinig_field[(int(y), int(x))] = symbol
+        y = input("Введите y (от 0 до 2): ")        #Пользователь вводит координаты
+        if coordinate_check(x, y):      #Проверяем что координаты введены верно
+            if a[(int(y), int(x))] == "-": #Проверяем что в указанных координатах поле пустое
+                a[(int(y), int(x))] = symbol   #если поле пустое добавляем нужный символ
                 break
             else:
-                print("Позиция занята, попробуйте снова")
+                print("Позиция занята, введите другие координаты")
                 continue
         else:
             print("Вы ввели не верные координаты, попробуйте снова")
@@ -97,7 +113,15 @@ def check_add_symbol(symbol:str) -> any:
 
 
 
-def draw_tect(a: dict) -> bool:
+def playing_field_full(a: dict) -> bool:
+
+    """Проверка заполнености игрового поля
+
+    Функция проверяет что на игровои поле не осталось пустых ячеек,
+    и возвращает 'True' если игровое поле заполнено, иначе возвращает 'False'
+
+    """
+
     x = True
     for value in a.values():
         if value == "-":
@@ -105,67 +129,147 @@ def draw_tect(a: dict) -> bool:
     return x
 
 
+def playfield_reset(my_dict: dict) -> None:
+
+    """ Обнуление игрового поля
+
+    Функция записывает во все ячейки игрового поля символ '-'
+
+    """
+
+    for i in range(3):
+        for j in range(3):
+            my_dict[(i , j)] = "-"
+
+
+
 
 def game(n:int) -> any:
+    """Реализация игры
+
+    1. Функция определяет очередность хода для игроков:
+        - если число 'n' - четное переменной 'symbol' присваивается значение 'X'
+            (ход выполняет игрок с символом 'X')
+        - если число 'n' - не четное 'symbol' присваивается значение 'О'
+            (ход выполняет игрок с символом 'О')
+
+    2. Вызов функции 'check_add_symbol'.
+        Игрок вводит координаты, и функция добавляет необходимий символ на игровое проле
+
+    3. Вызов функции 'check_win'.
+        Выполняется проверка выигрышних комбинаций,
+        если комбинации есть выводится сообщение о победе игрока, и производится обнудение игрового поля
+
+    4. Выполняется проверка на отсутствие выигрышних комбинаций и заполненость игрового поля,
+        если комбинаций нет и поле полностью заполено выводится сообщение о ничьей,
+        так же производится обнуление игрового поля.
+
+    5. Если если небыло победы или ничьей ход выполняет следующий игрок
+
+    """
     while True:
-        print(dislayning_the_playinig_field(playinig_field))
+        print(dislayning_the_playinig_field(playinig_field)) #Вывод текущего состояния игрового поля
 
-        if n % 2 != 0:
+        if n % 2 != 0:                  # 1.
             symbol = "X"
-            check_add_symbol(symbol)
-            n = 2
-            if check_win(playinig_field, symbol):
+            check_add_symbol(playinig_field, symbol)    # 2.
+            n = 2                       #изменение значения переменной для перехода хода следуещему игроку
+            if check_win(playinig_field, symbol): # 3.
                 print("-" * 21)
-                print(dislayning_the_playinig_field(playinig_field))
+                print(dislayning_the_playinig_field(playinig_field)) #Вывод текущего состояния игрового поля
                 print("-" * 21)
-                print("X победил")
-                break
-            if not(check_win(playinig_field, symbol)) and draw_tect(playinig_field):
-                print("Ничья")
+                print("X победил")  #Вывод информации о победе игрока
+                playfield_reset(playinig_field) #обнуление игрового поля
                 break
 
-
+            elif not(check_win(playinig_field, symbol)) and playing_field_full(playinig_field):   #4.
+                # Проверка игорового поля на отсутствие выигрышних комбинаций
+                print("-" * 21)
+                print(dislayning_the_playinig_field(playinig_field))  #Вывод текущего состояния игрового поля
+                print("-" * 21)
+                print("Ничья")          #Вывод информации о ничьей
+                print("-" * 21)
+                playfield_reset(playinig_field)     #обнуление игрового поля
+                break
+            #5.
         else:
             symbol = "O"
-            check_add_symbol(symbol)
-            check_win(playinig_field, symbol)
-            n = 1
+            check_add_symbol(playinig_field, symbol)  # 2.
+            n = 1 #изменение значения переменной для перехода хода следуещему игроку
             if check_win(playinig_field, symbol):
                 print("-" * 21)
-                print(dislayning_the_playinig_field(playinig_field))
+                print(dislayning_the_playinig_field(playinig_field)) #Вывод текущего состояния игрового поля
                 print("-" * 21)
-                print("O победил")
+                print("O победил") #Вывод информации о победе игрока
+                playfield_reset(playinig_field)
                 break
-            if not (check_win(playinig_field, symbol)) and draw_tect(playinig_field):
+            elif not (check_win(playinig_field, symbol)) and playing_field_full(playinig_field): #4.
+                print("-" * 21)
+                print(dislayning_the_playinig_field(playinig_field))  # Вывод текущего состояния игрового поля
+                print("-" * 21)
                 print("Ничья")
+                print("-" * 21)
+                playfield_reset(playinig_field) #обнуление игрового поля
                 break
 
 
+def game_rules():
+
+    """Вывод на экран правил игры"""
+
+    print("1. Игровое поле: сетка размером 3×3. \n"
+          "2. Роли игроков: один играет за «X», другой за «O». \n"
+          "3. Цель: выстроить три одинаковых символа подряд — вертикально, горизонтально или по диагонали. \n"
+          "4. Ход игры: игроки размещают свои символы на свободные ячейки. Очередность определяется случайным образом. \n"
+          "5. Последовательность ходов: участники игры ходят поочерёдно, пропуск хода кем-либо недопустим. \n"
+          "6. Выигрыш: игрок побеждает, выстроив три своих символа подряд. \n"
+          "7. Ничья: если все ячейки заняты, и никто не собрал линию из трёх символов, игра считается ничейной.")
+
+
+def player_interaction():
+    """Функция для взаимодействия с игроком
+
+    Игроку предлагается выбрать одно из действий.
+    Выплняется проверка корректности выбраного действия.
+    В зависимости от выбора игрока:
+    1. начинается новая игра
+        игра случайным образом выбирает игрока кто первым выполняет ход,
+        производится вызов функции 'game()'
+    2. выводятся провила игры
+    3. игра завершиется
+
+
+
+    """
+    while True:
+        print("-" * 21)
+        print("   Добро подаловать  \n"
+              "       в игру \n"
+              "  'Крестики-Нолики'")
+        print("-" * 21)
+        print("1. Начать новую игру!")
+        print("2. Правила игры")
+        print("3. Завершить игру")
+        print("-" * 21)
+        i = input("Выберете действие: ")
+        if i.isdigit():
+            if int(i) == 1 or int(i) == 2 or int(i) == 3:
+                if int(i) == 1:
+                    n = random.randint(1, 2)
+                    game(n)
+                elif int(i) == 2:
+                    game_rules()
+                elif int(i) == 3:
+                    print("-" * 21)
+                    print("Игра закончена!")
+                    print("-" * 21)
+                    break
+            else:
+                print("Введите коректное число")
+        else:
+            print("Вы ввели не число! попробуйте снова")
 
 
 
 
-
-
-
-
-# while True:
-#     print("-" * 21)
-#     print("   Добро подаловать  \n"
-#           "       в игру \n"
-#           "  'Крестики-Нолики'")
-#     print("-" * 21)
-#     print("1. Начать новую игру!")
-#     print("2. Завершить игру")
-#     print("-" * 21)
-#     n = 1
-#     i = int(input("Выберете действие: "))
-#
-#     if i == 1:
-#         game(n)
-#
-#     elif i == 2:
-#         print("Игра закончена!")
-#     elif i == 3:
-#         print("Игра закончена!")
-#         break
+player_interaction()
